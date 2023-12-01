@@ -1,0 +1,107 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    var userSession = HttpContextAccessor.HttpContext.Session.GetString("UserSession");
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AIOtopark</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AIOtopark.styles.css" asp-append-version="true"/>
+    <link href="~/css/navbarUserName.css" rel="stylesheet" />
+</head>
+
+    <!-- header section strats -->
+
+    <header class="header_section">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a asp-action="Index" asp-controller="Home" class="navbar-brand">
+                    <span>
+                        AIOtopark
+                    </span>
+                </a>
+
+                <div class="navbar-collapse" id="">
+                    <div class="user_option">
+
+                    @{
+                        if (userSession != null)
+                        {
+                            <div class="dropdown">
+                                <button class="dropbtn">@userSession</button>
+                                <div class="dropdown-content">
+                                    <a href="#">Rezervasyon</a>
+                                    <a href="#">Çıkış</a>
+                                </div>
+                            </div>
+                        } 
+                        else
+                        {
+                            <a asp-action="SignIn" asp-controller="Login">
+                                Giriş
+                            </a> 
+                        }
+                    } 
+                </div>
+                    <div class="custom_menu-btn">
+                        <button onclick="openNav()">
+                            <span class="s-1"> </span>
+                            <span class="s-2"> </span>
+                            <span class="s-3"> </span>
+                        </button>
+                    </div>
+                    <div id="myNav" class="overlay">
+                        <div class="overlay-content">
+                        <a href="index.html">Home</a>
+                        <a href="about.html">About</a>
+                        <a href="contact.html">Contact Us</a>
+
+                        @{
+                            if (userSession != null)
+                            {
+                                <a href="#">Rezervasyon</a>
+                                <a href="#">Çıkış</a>
+
+                            }
+                            else
+                            {
+                                <a asp-action="SignIn" asp-controller="Login">Giriş</a>
+                                <a asp-action="Registration" asp-controller="Login">Kaydol</a>
+                            }
+                        }
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <!-- end header section -->
+<main role="main">
+         @RenderBody()
+</main>
+
+    <!-- footer section -->
+    <footer class="container-fluid footer_section">
+        <p>
+            Copyright &copy; 2023 All Rights Reserved.
+        </p>
+    </footer>
+    <!-- footer section -->
+
+    <script src="~/js/jquery-3.4.1.min.js"></script>
+    <script src="~/js/bootstrap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js">
+    </script>
+    <script src="~/js/custom.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</html>

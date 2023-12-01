@@ -1,0 +1,9 @@
+﻿.header_section {
+    position: relative;
+}
+
+.container-fluid.footer_section {
+    position: fixed;
+    bottom: 0;
+    background-color:transparent;
+}

@@ -1,0 +1,80 @@
+﻿@model FirebaseService.Models.RegisterModel
+
+@{
+	ViewData["Title"] = "Kayıt Ol";
+}
+<head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- Site Metas -->
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>Rent4u</title>
+
+    <!-- slider stylesheet -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+
+    <!-- bootstrap core css -->
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap.css" />
+
+    <!-- fonts style -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&display=swap" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="~/css/style.css" rel="stylesheet" />
+    <link href="~/css/custom-navbar.css" rel="stylesheet" />
+
+    <!-- responsive style -->
+    <link href="~/css/responsive.css" rel="stylesheet" />
+</head>
+<body class="bodyRegister">
+    <section class="contact_section2 layout_padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mx-auto">
+                    <div class="form_container">
+                        <form asp-action="Register" asp-controller="Login" method="post">
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <input type="text" asp-for="@Model.fname" class="form-control" id="fname" placeholder="İsim Soyisim" required>
+                                    <span asp-validation-for="@Model.fname" class="text-danger"></span>
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <input type="tel" asp-for="@Model.phone" class="form-control" id="phone" placeholder="Telefon No (5xx)" required maxlength="10">
+                                    <span asp-validation-for="@Model.phone" class="text-danger"></span>
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <input type="email" asp-for="@Model.email" class="form-control" id="email" placeholder="Email " required>
+                                    <span asp-validation-for="@Model.email" class="text-danger"></span>
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <input type="password" asp-for="@Model.password" class="form-control" id="password" placeholder="Şifre" required >
+                                    <span asp-validation-for="@Model.password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="">Kaydol</button>
+                            </div>
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
