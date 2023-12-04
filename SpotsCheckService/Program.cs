@@ -29,6 +29,8 @@ namespace SpotsCheckService
 
             //ThreadPool.QueueUserWorkItem(sendPostRequest);
             await sendPostRequest();
+
+            Thread.Sleep(10000);
         }
         public static async Task ExecuteAsync(CancellationTokenSource cts)
         {
@@ -133,7 +135,7 @@ namespace SpotsCheckService
                 data.Add(spot.SpotIndex.ToString(), spot.Status);
             }
 
-            FirebaseService.Program obj = new FirebaseService.Program();
+            //FirebaseService.Program obj = new FirebaseService.Program();
             FirebaseService.Program.writeStates(data);
 
             Thread.Sleep(10000);

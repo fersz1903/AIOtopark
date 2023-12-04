@@ -25,12 +25,20 @@ namespace FirebaseService
         public Program()
         {
             setEnviroment();
+
+
+
         }
         static void Main(string[] args)
         {
             setEnviroment();
             //deneme();
             //createUser();
+
+            //setParkingLotMainPhoto("otopark2", "parkinglot2.jpg");
+            //getAllParkingLotsMainPhoto();
+
+            getParkingLotPreviews();
             Thread.Sleep(5000);
             //uploadParkPoses();
             //getParkPosesFromFirestore();
@@ -200,7 +208,7 @@ namespace FirebaseService
         public static async void writeStates(Dictionary<string,bool> data)
         {
             FirestoreDb db = ConnectionConfig();
-            var docRef = db.Collection("otopark1").Document("SpotsStatus");
+            var docRef = db.Collection("otopark1").Document("SpotsStatus").Collection("Section1").Document("Statuses");
 
             var result = docRef.SetAsync(data).GetAwaiter().GetResult();
 
@@ -209,6 +217,161 @@ namespace FirebaseService
 
 
 
+        //düzenlenecek
+        public static void updateParkingLotMainPhoto(string pLotName, string photoName)
+        {
+            FirestoreDb db = ConnectionConfig();
+            CollectionReference collRef = db.Collection(pLotName);
+            DocumentReference docRef = collRef.Document("images");
+            string mainPhotoPath = "../parkingLotImages/" + photoName;
+
+
+            //Dictionary<string, object> docData = new Dictionary<string, object>
+            //{
+            //    { "MainPhoto2", mainPhotoPath }
+            //};
+
+            Dictionary<string, object> docData = new Dictionary<string, object>
+            {
+                { "MainPhoto", mainPhotoPath }
+            };
+            docRef.UpdateAsync(docData).GetAwaiter().GetResult();
+            Debug.WriteLine("writed: "+docData);
+        }
+
+        public static async Task<List<string>> getAllParkingLotsMainPhoto()
+        {
+            List<string> list = new List<string>();
+            FirestoreDb db = ConnectionConfig();
+            try
+            {
+                IAsyncEnumerable<CollectionReference> rootCollRef = db.ListRootCollectionsAsync();
+                IAsyncEnumerator<CollectionReference> subcollectionsEnumerator = rootCollRef.GetAsyncEnumerator(default);
+
+                while (await subcollectionsEnumerator.MoveNextAsync())
+                {
+                    CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
+                    DocumentSnapshot snapshot = await subcollectionRef.Document("images").GetSnapshotAsync();
+
+                    if (snapshot.Exists)
+                    {
+                        Dictionary<string, object> data = snapshot.ToDictionary();
+                        foreach (KeyValuePair<string, object> pair in data)
+                        {
+                            if (pair.Key == "MainPhoto")
+                            {
+                                list.Add(pair.Value.ToString());
+                            }
+                        }
+                    }
+
+                }
+                return list;
+            }
+            catch (Exception e)
+            {              
+                Debug.WriteLine(e.Message);
+                return null;
+            }
+        }
+
+
+        public static async Task<List<ParkingLotModel>> getParkingLots()
+        {
+            List<ParkingLotModel> list = new List<ParkingLotModel>();
+            ParkingLotModel parkingLotModel = new ParkingLotModel();
+            FirestoreDb db = ConnectionConfig();
+
+            try
+            {
+                IAsyncEnumerable<CollectionReference> rootCollRef = db.ListRootCollectionsAsync();
+                IAsyncEnumerator<CollectionReference> subcollectionsEnumerator = rootCollRef.GetAsyncEnumerator(default);
+
+                while (await subcollectionsEnumerator.MoveNextAsync())
+                {
+                    CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
+                    parkingLotModel.name = subcollectionRef.Id.ToString();
+
+                    DocumentReference docRef = subcollectionRef.Document("SpotsStatus");
+
+                    // buralar düzenlenecek
+                    
+                    
+                    
+                    DocumentSnapshot snapshot = await subcollectionRef.Document("images").GetSnapshotAsync();
+
+                    
+
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                return null;
+            }
+
+        }
+
+        public static int countTrueStatements(Dictionary<string,object> data)
+        {
+            int count = 0;
+            foreach (KeyValuePair<string, object> pair in data)
+            {
+                if (pair.Value.Equals(true))
+                    count++;
+            }
+            return count;
+        }
+
+
+        public static async Task<List<ParkingLotPreviewModel>> getParkingLotPreviews()
+        {
+            List<ParkingLotPreviewModel> list = new List<ParkingLotPreviewModel>();
+            FirestoreDb db = ConnectionConfig();
+
+            try
+            {
+                IAsyncEnumerable<CollectionReference> rootCollRef = db.ListRootCollectionsAsync();
+                IAsyncEnumerator<CollectionReference> subcollectionsEnumerator = rootCollRef.GetAsyncEnumerator(default);
+
+                while (await subcollectionsEnumerator.MoveNextAsync())
+                {
+                    ParkingLotPreviewModel parkingLotPreviewModel = new ParkingLotPreviewModel();
+                    CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
+                    parkingLotPreviewModel.name = subcollectionRef.Id.ToString(); //otopark1-2-3
+
+                    DocumentReference docRef = subcollectionRef.Document("SpotsStatus").Collection("Section1").Document("Statuses"); // farklı section durumları düzenlenecek
+                    DocumentSnapshot snap = await docRef.GetSnapshotAsync();
+                    if (snap.Exists)
+                    {
+                        Console.WriteLine("Document data for {0} document:", snap.Id);
+                        Dictionary<string, object> data = snap.ToDictionary();
+                        parkingLotPreviewModel.totalParkCount = data.Keys.Count();
+                        parkingLotPreviewModel.freeParkCount = countTrueStatements(data);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Document {0} does not exist!", snap.Id);
+                    }
+
+                    docRef = subcollectionRef.Document("images");
+                    snap = await docRef.GetSnapshotAsync();
+                    if (snap.Exists)
+                    {
+                        parkingLotPreviewModel.mainPhoto = snap.GetValue<string>("MainPhoto");
+                    }
+                    list.Add(parkingLotPreviewModel);
+
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                return null;
+            }
+        }
 
     }
 }

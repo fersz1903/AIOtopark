@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<FirebaseService.Models.ParkingLotPreviewModel>
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -93,7 +94,25 @@
     <section class="rent_section layout_padding">
         <div class="container">
             <div class="rent_container">
-                <div class="box">
+                @{
+                    foreach(var item in Model)
+                    {
+                        <div class="box">
+                            <div class="parkName">
+                                @item.name
+                            </div>
+                            <div class="img-box">
+                                <img src="@item.mainPhoto" alt="">
+                            </div>
+                            <div class="price">
+                                <a href="">
+                                    Otopark Durumu: @item.freeParkCount / @item.totalParkCount
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+                @* <div class="box">
                     <div class="img-box">
                         <img src="~/images/r-1.png" alt="">
                     </div>
@@ -102,8 +121,8 @@
                             Rent $200
                         </a>
                     </div>
-                </div>
-                <div class="box">
+                </div> *@
+                @* <div class="box">
                     <div class="img-box">
                         <img src="~/images/r-2.png" alt="">
                     </div>
@@ -125,7 +144,7 @@
                 </div>
                 <div class="box">
                     <div class="img-box">
-                        <img src="~/images/r-4.png" alt="">
+                        <img src="../images/r-4.png" alt="">
                     </div>
                     <div class="price">
                         <a href="">
@@ -152,7 +171,7 @@
                             Rent $200
                         </a>
                     </div>
-                </div>
+                </div> *@
             </div>
             <div class="btn-box">
                 <a href="">

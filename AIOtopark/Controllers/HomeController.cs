@@ -21,13 +21,16 @@ namespace AIOtopark.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            List<ParkingLotPreviewModel> list = await FirebaseService.Program.getParkingLotPreviews();
+
+
             //getAvailableSpots();
             //SpotsCheckService.Program.deneme();
             //getAvailableSpotsWithPhoto();
             //SpotsCheckService.Program.sendPostRequest();
-            return View();
+            return View(list);
         }
 
         //public async void getAvailableSpots()

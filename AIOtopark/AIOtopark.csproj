@@ -15,4 +15,8 @@
     <ProjectReference Include="..\SpotsCheckService\SpotsCheckService.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\parkingLotImages\" />
+  </ItemGroup>
+
 </Project>

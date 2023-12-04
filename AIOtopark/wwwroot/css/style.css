@@ -664,6 +664,13 @@ a:focus {
         border-radius: 5px;
     }
 
+.rent_section .rent_container .box .parkName {
+    color: white;
+    font-weight: bold;
+}
+
+
+
 .rent_section .rent_container .box .img-box {
   margin: 50px 0;
   height: 92px;
