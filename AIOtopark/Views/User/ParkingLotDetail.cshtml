@@ -1,0 +1,132 @@
+﻿@model FirebaseService.Models.ParkingLotModel
+@{
+    ViewData["Title"] = "Parkinglot Detail";
+}
+<head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- Site Metas -->
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    
+    <!-- slider stylesheet -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+
+    <!-- bootstrap core css -->
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap.css" />
+
+    <!-- fonts style -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&display=swap" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="~/css/style.css" rel="stylesheet" />
+    @* <link href="~/css/custom-navbar.css" rel="stylesheet" /> *@
+
+    <!-- responsive style -->
+    <link href="~/css/responsive.css" rel="stylesheet" />
+
+    <style>
+        /* İsteğe bağlı: Datepicker'ın görünümünü özelleştirmek için CSS */
+        .ui-datepicker {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="bodyParkinglotDetail">
+    <section class="parkinglot-detail">
+        <div class="parkinglot-container">
+            <div class="parkinglot-name">
+                @Model.name
+            </div>
+            <div class="image-container">
+                <img src="@Model.firstFrame" class="detail-image"/>
+            </div>
+
+            <div class="">
+                <div class="price-container">
+                    @{
+                        foreach (KeyValuePair<string, object> kvp in Model.prices)
+                        {
+                            <p>@kvp.Key.ToString() = @kvp.Value.ToString() TL</p>
+                            <br />
+                        }
+                    }
+                </div>
+            </div>
+            
+            <div>
+                <p>@Model.adress</p>
+                <br />
+            </div> 
+            <div class="parkinglot-name">
+                Rezervasyon
+            </div>
+            <div class="payment-container">
+                <form asp-action="makePayment" asp-controller="User">
+
+                    <div>
+                        <label for="price">Süre Seçin: </label>
+                        <select name="priceKey" id="price">
+                            @{
+                                foreach (KeyValuePair<string, object> kvp in Model.prices)
+                                {
+                                    
+                                    <option value=@kvp.Key>@kvp.Key.ToString() Saat</option>
+
+                                }
+                            }
+                        </select>
+                        <br />
+                        <label for="selectedDate">Tarih Seçin:</label>
+                        <input type="date" id="selectedDate" name="date" onchange="validateDate()" required>
+                        <br />
+
+                        <label for="time">Saat Seçin:</label>
+                        <input type="time" id="time" name="startHour" required>
+                        <br />
+
+                        <input type="text" name="plate" id="plate" placeholder="Araç Plakası" required />
+                        <br />
+
+                        <input type="text" name="cardHolderName" placeholder="Kartın Üzerindeki İsim:" required />
+                        <br />
+
+                        <input type="number" name="cardNumber" placeholder="Kredi Kartı Numarası" required />
+                        <br />
+
+                        <input type="number" name="expireMonth" maxlength="2" placeholder="Ay" required />
+                        <br />
+
+                        <input type="number" name="expireYear" maxlength="4" placeholder="Yıl" required />
+                        <br />
+
+                        <input type="number" name="cvc" maxlength="3" placeholder="CVC/CVV" required />
+                        <br />
+
+                        <input type="hidden" name="plName" value=@Model.name />
+                        <button type="submit" > Ödeme Yap </button>
+                    </div>
+                </form>               
+            </div>
+        </div>
+    </section>
+</body>
+
+<script>
+    function validateDate() {
+        var inputDate = new Date(document.getElementById('selectedDate').value);
+        var currentDate = new Date();
+        var maxDate = new Date(currentDate);
+        maxDate.setDate(currentDate.getDate() + 15);
+
+        if (inputDate > maxDate) {
+            alert("Geçerli bir tarih seçin (maksimum 15 gün sonrası)!");
+            document.getElementById('selectedDate').value = currentDate;
+        }
+    }
+</script>

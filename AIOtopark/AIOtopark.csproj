@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FirebaseAdminAuthentication.DependencyInjection" Version="1.0.2" />
+    <PackageReference Include="Iyzipay" Version="2.1.55" />
   </ItemGroup>
 
   <ItemGroup>

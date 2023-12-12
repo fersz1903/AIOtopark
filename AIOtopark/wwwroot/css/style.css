@@ -9,6 +9,11 @@ body {
     background-size: cover;
     color: #fefdfc;
 }
+.bodyParkinglotDetail {
+    background-image: url(../images/contact-bg.jpg);
+    background-size: cover;
+    color: #fefdfc;
+}
 
 .layout_padding {
     padding-top: 90px;
@@ -689,20 +694,35 @@ a:focus {
   max-width: 100%;
 }
 
-.rent_section .rent_container .box .price a {
-  display: inline-block;
-  padding: 8px 25px;
-  background-color: #f22324;
-  color: #fefdfc;
-  border-radius: 4px;
-  border: 1px solid #f22324;
-  font-weight: bold;
-}
+        .rent_section .rent_container .box .price a {
+            display: inline-block;
+            padding: 8px 25px;
+            background-color: #f22324;
+            color: #fefdfc;
+            border-radius: 4px;
+            border: 1px solid #f22324;
+            font-weight: bold;
+        }
 
-    .rent_section .rent_container .box .price a:hover {
-        background-color: transparent;
-        color: #fefdfc;
-    }
+            .rent_section .rent_container .box .price a:hover {
+                background-color: transparent;
+                color: #fefdfc;
+            }
+
+        .rent_section .rent_container .box .price .parkinglotShow {
+            display: inline-block;
+            padding: 8px 25px;
+            background-color: #f22324;
+            color: #fefdfc;
+            border-radius: 4px;
+            border: 1px solid #f22324;
+            font-weight: bold;
+        }
+
+            .rent_section .rent_container .box .price .parkinglotShow:hover {
+                background-color: transparent;
+                color: #fefdfc;
+            }
 
 .rent_section .btn-box {
   display: -webkit-box;
@@ -1169,4 +1189,42 @@ a:focus {
 .footer_section a {
   color: #fefdfc;
 }
+
+.parkinglot-detail {
+    margin-top:30px;
+    position:relative;
+    display:flex;
+    
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Sayfa yüksekliði kadar */
+}
+.parkinglot-container {
+    max-width: 90%; 
+    height: auto;
+}
+
+.parkinglot-name{
+    font-size:20px;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:2rem;
+}
+
+
+.image-container {
+    text-align: center;
+}
+
+
+.detail-image {
+    max-width: 1000px; /* Görüntüyü konteynerin içinde tutmak için */
+    height: auto;
+}
+
+.price-container{
+    margin-top:2rem;
+}
+
+
 /*# sourceMappingURL=style.css.map */

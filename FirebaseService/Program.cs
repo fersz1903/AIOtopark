@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection.Metadata;
 using System.Text;
 using static Google.Cloud.Firestore.V1.StructuredQuery.Types;
@@ -32,26 +33,37 @@ namespace FirebaseService
         static void Main(string[] args)
         {
             setEnviroment();
-            //deneme();
+            deneme();
             //createUser();
 
             //setParkingLotMainPhoto("otopark2", "parkinglot2.jpg");
             //getAllParkingLotsMainPhoto();
 
-            getParkingLotPreviews();
-            Thread.Sleep(5000);
+            //getParkingLotPreviews();
             //uploadParkPoses();
             //getParkPosesFromFirestore();
+            //GetParkingLot("otopark1");
+
+            
+
+
+
+
+
+
+
+            Thread.Sleep(10000);
         }
 
-        //public static async void deneme()
-        //{
-        //    //FirebaseApp.Create();
-        //    UserRecord userRecord = await FirebaseAuth.DefaultInstance.GetUserByEmailAsync("asdasdasdasdad@example.com");
+        public static async void deneme()
+        {
+            //FirebaseApp.Create();
+            UserRecord userRecord = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.GetUserByEmailAsync("asdasaad@example.com");
 
-        //    // See the UserRecord reference doc for the contents of userRecord.
-        //    Console.WriteLine($"Successfully fetched user data: {userRecord.PhoneNumber}");
-        //}
+            //setReservation(userRecord, "otopark1","06 AA 06","3");
+            // See the UserRecord reference doc for the contents of userRecord.
+            Console.WriteLine($"Successfully fetched user data: {userRecord.PhoneNumber}");
+        }
 
         public static void setEnviroment()
         {
@@ -62,6 +74,7 @@ namespace FirebaseService
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", cloudFirePath);
             FirebaseApp.Create();
         }
+
 
 
         public static async Task<string> createUser(RegisterModel register)
@@ -121,7 +134,7 @@ namespace FirebaseService
                     { "x", coordinates[0] },
                     { "y", coordinates[1] }
                 };
-                var result = db.Collection("otopark1").Document("ParkPoseCoordinates").Collection("Section1").Document(""+i.ToString()).SetAsync(doc).GetAwaiter().GetResult();
+                var result = db.Collection("otopark5").Document("ParkPoseCoordinates").Collection("Section1").Document(""+i.ToString()).SetAsync(doc).GetAwaiter().GetResult();
                 i++;
             }
             //var docRef = db.Collection("otopark1").Document("CarParkPoses");
@@ -276,42 +289,42 @@ namespace FirebaseService
         }
 
 
-        public static async Task<List<ParkingLotModel>> getParkingLots()
-        {
-            List<ParkingLotModel> list = new List<ParkingLotModel>();
-            ParkingLotModel parkingLotModel = new ParkingLotModel();
-            FirestoreDb db = ConnectionConfig();
+        //public static async Task<List<ParkingLotModel>> getParkingLots()
+        //{
+        //    List<ParkingLotModel> list = new List<ParkingLotModel>();
+        //    ParkingLotModel parkingLotModel = new ParkingLotModel();
+        //    FirestoreDb db = ConnectionConfig();
 
-            try
-            {
-                IAsyncEnumerable<CollectionReference> rootCollRef = db.ListRootCollectionsAsync();
-                IAsyncEnumerator<CollectionReference> subcollectionsEnumerator = rootCollRef.GetAsyncEnumerator(default);
+        //    try
+        //    {
+        //        IAsyncEnumerable<CollectionReference> rootCollRef = db.ListRootCollectionsAsync();
+        //        IAsyncEnumerator<CollectionReference> subcollectionsEnumerator = rootCollRef.GetAsyncEnumerator(default);
 
-                while (await subcollectionsEnumerator.MoveNextAsync())
-                {
-                    CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
-                    parkingLotModel.name = subcollectionRef.Id.ToString();
+        //        while (await subcollectionsEnumerator.MoveNextAsync())
+        //        {
+        //            CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
+        //            parkingLotModel.name = subcollectionRef.Id.ToString();
 
-                    DocumentReference docRef = subcollectionRef.Document("SpotsStatus");
+        //            DocumentReference docRef = subcollectionRef.Document("SpotsStatus");
 
-                    // buralar düzenlenecek
+        //            // buralar düzenlenecek
                     
                     
                     
-                    DocumentSnapshot snapshot = await subcollectionRef.Document("images").GetSnapshotAsync();
+        //            DocumentSnapshot snapshot = await subcollectionRef.Document("images").GetSnapshotAsync();
 
                     
 
-                }
-                return list;
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-                return null;
-            }
+        //        }
+        //        return list;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.WriteLine(e.Message);
+        //        return null;
+        //    }
 
-        }
+        //}
 
         public static int countTrueStatements(Dictionary<string,object> data)
         {
@@ -323,7 +336,6 @@ namespace FirebaseService
             }
             return count;
         }
-
 
         public static async Task<List<ParkingLotPreviewModel>> getParkingLotPreviews()
         {
@@ -373,5 +385,104 @@ namespace FirebaseService
             }
         }
 
+
+        public static async Task<ParkingLotModel> GetParkingLot(string plName)
+        {
+            ParkingLotModel parkingLotModel = new ParkingLotModel();
+            FirestoreDb db = ConnectionConfig();
+            CollectionReference collRef = db.Collection(plName);
+            parkingLotModel.name = collRef.Id;
+
+            DocumentReference docRef = collRef.Document("SpotsStatus").Collection("Section1").Document("Statuses");
+            DocumentSnapshot snap = await docRef.GetSnapshotAsync();
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            if (snap.Exists)
+            {
+                //data = snap.ConvertTo<Dictionary<string, bool>>();
+                data = snap.ToDictionary();
+                parkingLotModel.freeParkCount = countTrueStatements(data);
+                parkingLotModel.totalParkCount = data.Count();
+            }
+            docRef = collRef.Document("Prices");
+            snap = await docRef.GetSnapshotAsync();
+
+            if (snap.Exists)
+            {
+                data = snap.ToDictionary();
+                parkingLotModel.prices = data;
+            }
+            docRef = collRef.Document("Adress");
+            snap = await docRef.GetSnapshotAsync();
+            if (snap.Exists)
+            {
+                data = snap.ToDictionary();
+                parkingLotModel.adress = data.GetValueOrDefault("adress").ToString();
+            }
+            docRef = collRef.Document("images");
+            snap = await docRef.GetSnapshotAsync();
+            if(snap.Exists)
+            {
+                data = snap.ToDictionary();
+                parkingLotModel.mainPhoto = data.GetValueOrDefault("MainPhoto").ToString();
+                parkingLotModel.firstFrame = data.GetValueOrDefault("FirstFrame").ToString();
+            }
+            return parkingLotModel;
+        }
+
+        public static async Task<string> setReservation(UserRecord user, string plName, string plate, string range,string date, string startHour)
+        {
+            try
+            {
+                FirestoreDb db = ConnectionConfig();
+                var docRef = db.Collection(plName).Document("Reservations");
+
+                Dictionary<string, object> reservationDetail = new Dictionary<string, object>()
+                {
+                    { "startDate", date },
+                    { "startHour", startHour },
+                    { "range", range },
+                    { "plate",  plate }
+                };
+
+                Dictionary<string, object> reservation = new Dictionary<string, object>()
+                {
+                    { user.Uid , reservationDetail },
+                };
+
+                if (!checkReservation(plName,user.Uid))
+                {
+                    var result = docRef.SetAsync(reservation, SetOptions.MergeAll).GetAwaiter().GetResult();
+                    return "success";
+                }
+                else
+                    return "failed";
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                return "failed";
+            }
+        }
+
+        public static string getPrice(string plName, string key)
+        {
+            FirestoreDb db = ConnectionConfig();
+            var docRef = db.Collection(plName).Document("Prices");
+            DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+            return snap.GetValue<string>(key);
+        }
+
+        public static bool checkReservation(string plName,string uid)
+        {
+            FirestoreDb db = ConnectionConfig();
+            var docRef = db.Collection(plName).Document("Reservations");
+            DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+            foreach (var item in snap.ToDictionary())
+            {
+                if (item.Key == uid) { return true; }
+            }
+            return false;
+        }
     }
 }

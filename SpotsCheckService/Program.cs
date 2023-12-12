@@ -141,5 +141,11 @@ namespace SpotsCheckService
             Thread.Sleep(10000);
 
         }
+
+
+
+        /// rezervasyonları say ve otopark durumlarını firebase' e yaz
+        /// firebase' e yazma kodu hazır zaten sadece reservasyonları da dikkate alarak otopark durumlarını güncelle
+        /// Rezervasyonları kontrol eden servisi yaz. Süresi biten rezervasyonları silmeli.
     }
 }

@@ -1,6 +1,6 @@
 ﻿@model List<FirebaseService.Models.ParkingLotPreviewModel>
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Parkinglots";
 }
 
 <!DOCTYPE html>
@@ -53,7 +53,7 @@
                                         Aramaya  <br>
                                         SON!
                                     </h1>
-                                    <a href="">
+                                    <a asp-action="Parkinglots" asp-controller="User">
                                         Rezervasyon
                                     </a>
                                 </div>
@@ -68,7 +68,7 @@
                                             Aramaya  <br>
                                             SON!
                                         </h1>
-                                        <a href="">
+                                        <a asp-action="Parkinglots" asp-controller="User">
                                             Rezervasyon
                                         </a>
                                     </div>
@@ -174,7 +174,7 @@
                 </div> *@
             </div>
             <div class="btn-box">
-                <a href="">
+                <a asp-action="Parkinglots" asp-controller="User">
                     Daha Fazla
                 </a>
             </div>
