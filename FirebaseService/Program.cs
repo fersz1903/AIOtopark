@@ -4,6 +4,8 @@ using FirebaseAdmin.Auth;
 using FirebaseService.Model;
 using FirebaseService.Models;
 using Google.Cloud.Firestore;
+using Google.Cloud.Firestore.V1;
+
 //using Google.Cloud.Firestore.V1;
 using Google.Protobuf.Collections;
 using Newtonsoft.Json;
@@ -11,6 +13,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Reflection.Metadata;
 using System.Text;
 using static Google.Cloud.Firestore.V1.StructuredQuery.Types;
@@ -44,13 +47,6 @@ namespace FirebaseService
             //getParkPosesFromFirestore();
             //GetParkingLot("otopark1");
 
-            
-
-
-
-
-
-
 
             Thread.Sleep(10000);
         }
@@ -58,11 +54,13 @@ namespace FirebaseService
         public static async void deneme()
         {
             //FirebaseApp.Create();
-            UserRecord userRecord = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.GetUserByEmailAsync("asdasaad@example.com");
+            //UserRecord userRecord = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.GetUserByEmailAsync("asdasaad@example.com");
 
+            await GetParkingLot("otopark1");
+            Thread.Sleep(5000);
             //setReservation(userRecord, "otopark1","06 AA 06","3");
             // See the UserRecord reference doc for the contents of userRecord.
-            Console.WriteLine($"Successfully fetched user data: {userRecord.PhoneNumber}");
+            //Console.WriteLine($"Successfully fetched user data: {userRecord.PhoneNumber}");
         }
 
         public static void setEnviroment()
@@ -117,15 +115,37 @@ namespace FirebaseService
             return db;
         }
 
-        public static async void uploadParkPoses()
+        //public static async void uploadParkPoses()
+        //{
+        //    FirestoreDb db = ConnectionConfig();
+        //    string path = AppDomain.CurrentDomain.BaseDirectory + "ParkPoses\\" + "CarParkPos.json";
+
+        //    // JSON dosyasından verileri oku
+        //    List<List<int>> data = GetDataFromJson(path);
+
+        //    // Firestore'a verileri yükle
+        //    int i = 0;
+        //    foreach (var coordinates in data)
+        //    {
+        //        var doc = new Dictionary<string, object>
+        //        {
+        //            { "x", coordinates[0] },
+        //            { "y", coordinates[1] }
+        //        };
+        //        var result = db.Collection("otopark5").Document("ParkPoseCoordinates").Collection("Section1").Document(""+i.ToString()).SetAsync(doc).GetAwaiter().GetResult();
+        //        i++;
+        //    }
+        //    //var docRef = db.Collection("otopark1").Document("CarParkPoses");
+        //    //var result = docRef.SetAsync(doc).GetAwaiter().GetResult();
+        //    Console.WriteLine("Veriler başarıyla Firestore'a yüklendi.");
+        //}
+
+        public static async Task uploadParkPoses(string jsonContent, string plName)
         {
+            List<List<int>> data = JsonConvert.DeserializeObject<List<List<int>>>(jsonContent);
+
             FirestoreDb db = ConnectionConfig();
-            string path = AppDomain.CurrentDomain.BaseDirectory + "ParkPoses\\" + "CarParkPos.json";
 
-            // JSON dosyasından verileri oku
-            List<List<int>> data = GetDataFromJson(path);
-
-            // Firestore'a verileri yükle
             int i = 0;
             foreach (var coordinates in data)
             {
@@ -134,27 +154,29 @@ namespace FirebaseService
                     { "x", coordinates[0] },
                     { "y", coordinates[1] }
                 };
-                var result = db.Collection("otopark5").Document("ParkPoseCoordinates").Collection("Section1").Document(""+i.ToString()).SetAsync(doc).GetAwaiter().GetResult();
+                var result = db.Collection(plName).Document("ParkPoseCoordinates").Collection("Section1").Document(i.ToString()).SetAsync(doc).GetAwaiter().GetResult();
                 i++;
             }
-            //var docRef = db.Collection("otopark1").Document("CarParkPoses");
-            //var result = docRef.SetAsync(doc).GetAwaiter().GetResult();
+
             Console.WriteLine("Veriler başarıyla Firestore'a yüklendi.");
         }
 
-        public static string getParkPosesFromFirestore()
+
+
+        // park alanının coordinatlarını firestoredan alır
+        public static string getParkPosesFromFirestore(string plName)
         {
             FirestoreDb db = ConnectionConfig();
 
             // Firestore'dan veriyi çekme
-            QuerySnapshot snapshot = db.Collection("otopark1")
+            QuerySnapshot snapshot = db.Collection(plName)
                                         .Document("ParkPoseCoordinates")
                                         .Collection("Section1")
                                         .GetSnapshotAsync()
                                         .GetAwaiter()
                                         .GetResult();
 
-            var colRef = db.Collection("otopark1")
+            var colRef = db.Collection(plName)
                                         .Document("ParkPoseCoordinates")
                                         .Collection("Section1");
 
@@ -164,6 +186,7 @@ namespace FirebaseService
 
             for (int i = 0; i < snapshot.Documents.Count(); i++)
             {
+                // manuel döngü kullanarak düzgün bir şekilde indexlerin sıralanması sağlandı
                 DocumentSnapshot docSnap = colRef.Document(i.ToString()).GetSnapshotAsync().GetAwaiter().GetResult();
                 //var document = snapshot.Documents[i];
                 Dictionary<string, object> coordinate = docSnap.ToDictionary();
@@ -218,17 +241,15 @@ namespace FirebaseService
             return data;
         }
 
-        public static async void writeStates(Dictionary<string,bool> data)
+        public static async void writeStates(Dictionary<string,object> data,string plName)
         {
             FirestoreDb db = ConnectionConfig();
-            var docRef = db.Collection("otopark1").Document("SpotsStatus").Collection("Section1").Document("Statuses");
+            var docRef = db.Collection(plName).Document("SpotsStatus").Collection("Section1").Document("Statuses");
 
-            var result = docRef.SetAsync(data).GetAwaiter().GetResult();
+            var result = docRef.SetAsync(data, SetOptions.MergeAll ).GetAwaiter().GetResult();
 
             //var docRef = await coll.AddAsync(new {SpotsStatusList= spots});
         }
-
-
 
         //düzenlenecek
         public static void updateParkingLotMainPhoto(string pLotName, string photoName)
@@ -331,7 +352,7 @@ namespace FirebaseService
             int count = 0;
             foreach (KeyValuePair<string, object> pair in data)
             {
-                if (pair.Value.Equals(true))
+                if (((Dictionary<string,object>)pair.Value).GetValueOrDefault("status").Equals(true))
                     count++;
             }
             return count;
@@ -396,10 +417,25 @@ namespace FirebaseService
             DocumentReference docRef = collRef.Document("SpotsStatus").Collection("Section1").Document("Statuses");
             DocumentSnapshot snap = await docRef.GetSnapshotAsync();
             Dictionary<string, object> data = new Dictionary<string, object>();
+
+            List<SpotsStatusesModel> spotsList = new List<SpotsStatusesModel>();
+
             if (snap.Exists)
             {
                 //data = snap.ConvertTo<Dictionary<string, bool>>();
                 data = snap.ToDictionary();
+
+                foreach (var spotData in data)
+                {
+                    // Her haritayı SpotsStatusesModel sınıfına dönüştürün ve listeye ekleyin
+                    SpotsStatusesModel spot = new SpotsStatusesModel();
+                    spot.spotIndex = ((Dictionary<string, object>)spotData.Value).GetValueOrDefault("spotIndex").ToString();
+                    spot.status = (bool)((Dictionary<string, object>)spotData.Value).GetValueOrDefault("status");
+                    spot.isReserved = (bool)((Dictionary<string, object>)spotData.Value).GetValueOrDefault("isReserved");
+                    spotsList.Add(spot);
+                }
+
+                parkingLotModel.spotsStatusDetail = spotsList;
                 parkingLotModel.freeParkCount = countTrueStatements(data);
                 parkingLotModel.totalParkCount = data.Count();
             }
@@ -429,7 +465,7 @@ namespace FirebaseService
             return parkingLotModel;
         }
 
-        public static async Task<string> setReservation(UserRecord user, string plName, string plate, string range,string date, string startHour)
+        public static async Task<string> setReservation(UserRecord user, string plName, string plate, string range,string date, string startHour, string spotIndex)
         {
             try
             {
@@ -441,7 +477,8 @@ namespace FirebaseService
                     { "startDate", date },
                     { "startHour", startHour },
                     { "range", range },
-                    { "plate",  plate }
+                    { "plate",  plate },
+                    { "reservatedSpot", spotIndex }
                 };
 
                 Dictionary<string, object> reservation = new Dictionary<string, object>()
@@ -452,6 +489,22 @@ namespace FirebaseService
                 if (!checkReservation(plName,user.Uid))
                 {
                     var result = docRef.SetAsync(reservation, SetOptions.MergeAll).GetAwaiter().GetResult();
+                    if (result != null)
+                    {
+                        docRef = db.Collection(plName).Document("SpotsStatus").Collection("Section1").Document("Statuses");
+
+                        Dictionary<string, bool> update = new Dictionary<string, bool>()
+                        {
+                            { "isReserved", true }
+                        };
+                        Dictionary<string, object> data = new Dictionary<string, object>()
+                        {
+                            { spotIndex.ToString(), update }
+                        };
+                                               
+                        docRef.SetAsync(data,SetOptions.MergeAll);
+
+                    }
                     return "success";
                 }
                 else
@@ -484,5 +537,84 @@ namespace FirebaseService
             }
             return false;
         }
+
+        public static async Task<List<String>> getAllParkingLots()
+        {
+            List<String> list = new List<String>();
+            FirestoreDb db = ConnectionConfig();
+            try
+            {
+                IAsyncEnumerable<CollectionReference> rootCollRef = db.ListRootCollectionsAsync();
+                IAsyncEnumerator<CollectionReference> subcollectionsEnumerator = rootCollRef.GetAsyncEnumerator(default);
+                while (await subcollectionsEnumerator.MoveNextAsync())
+                {
+                    CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
+                    list.Add(subcollectionRef.Id.ToString());
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                return null;
+            }
+        }
+
+        public static string getFirstFramePath(string plName)
+        {
+            FirestoreDb db = ConnectionConfig();
+            DocumentReference docRef = db.Collection(plName).Document("images");
+
+            DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+            Dictionary<string,object> dict = new Dictionary<string,object>();
+            dict = snap.ToDictionary();
+            return dict.ContainsKey("FirstFrame") ? dict.GetValueOrDefault("FirstFrame").ToString() : null;
+        }
+
+        public static async Task<int> getUserCount()
+        {
+            int count = 0;
+            try
+            {
+                var enumerator = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.ListUsersAsync(null).GetAsyncEnumerator();
+                while (await enumerator.MoveNextAsync())
+                {
+                    ExportedUserRecord user = enumerator.Current;
+                    count++;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                return -1;
+            }
+            return count;
+		}
+
+        public static async Task<bool> addParkingLot(string plName, string adress,string mainPhotoPath, string firstFramePath, string poses)
+        {
+            FirestoreDb db = ConnectionConfig();
+            DocumentReference docRef = db.Collection(plName).Document("Adress");
+            Dictionary<string, object> data = new Dictionary<string, object>()
+            {
+                { "adress", adress }
+            };
+            await docRef.SetAsync(data);
+
+            data = new Dictionary<string, object>()
+            {
+                { "FirstFrame", firstFramePath},
+                { "MainPhoto", mainPhotoPath}
+            };
+            docRef = db.Collection(plName).Document("images");
+            await docRef.SetAsync(data);
+
+            await uploadParkPoses(poses, plName);
+
+            return true;
+            // SpotsStatus hemen eklenmeli!!
+
+        }
+
     }
 }

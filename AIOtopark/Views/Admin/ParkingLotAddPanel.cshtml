@@ -1,0 +1,107 @@
+﻿@{
+    ViewData["Title"] = "ParkingLotAddPanel";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- Site Metas -->
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+
+    <!-- slider stylesheet -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+
+    <!-- bootstrap core css -->
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap.css" />
+
+    <!-- fonts style -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&display=swap" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="~/css/admin/styleAdmin.css" rel="stylesheet" />
+
+    <!-- responsive style -->
+    <link href="~/css/admin/responsive.css" rel="stylesheet" />
+</head>
+<body class="plAddPanel">
+    <section class="contact_section2 layout_padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <div class="form_container">
+                        <p style="color:#f22324">@TempData["error"]</p>
+                        <form asp-action="saveParkingLot" asp-controller="Admin" method="post" enctype="multipart/form-data">
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <input type="text" class="form-control" name="plName" placeholder="Otopark Adı" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <input type="text" class="form-control" name="adress" placeholder="Adres" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="mainPhoto" class="label_text">Vitrin Fotoğrafı:</label>
+                                    <input type="file" value="file" name="mainPhoto" id="mainPhoto" accept=".png,.jpg" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="firstFrame" class="label_text">Otopark Alanı:</label>
+                                    <input type="file" value="file" name="firstFrame" id="firstFrame" accept=".png,.jpg" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <button type="button" id="choose" onclick="openNewPage()">Park Alanlarını Seç</button>
+                                    <input type="file" value="file" name="poses" id="posList" >
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <button id="save" type="submit" class="">Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function openNewPage() {
+            // Yeni pencereyi aç ve açılan pencerenin referansını al
+            var newWindow = window.open('@Url.Action("Picker")', "Admin", '_blank');
+
+            // Yeni pencere referansını sakla (kullanıcıdan alınan veriyi bu pencerede kullanmak için)
+            window.newlyOpenedWindow = newWindow;
+        }
+
+        function handleSave(jsonContent) {
+            // Gelen JSON içeriğini kullan
+
+            // JSON içeriğini içeren bir Blob oluştur
+            var blob = new Blob([jsonContent], { type: 'application/json' });
+
+            // Blob'u içeren bir File oluştur
+            var file = new File([blob], 'posList.json', { type: 'application/json' });
+
+            // Dosyayı bir input bileşenine eklemek için bir input elementi oluştur
+            var inputElement = document.getElementById('posList');
+
+            var fileList = new DataTransfer();
+            fileList.items.add(file);
+
+            inputElement.files = fileList.files;
+
+            console.log(jsonContent);
+        }
+    </script>
+</body>

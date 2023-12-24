@@ -42,7 +42,8 @@ namespace AIOtopark.Controllers
                                          string priceKey,
                                          string plate,
                                          string date,
-                                         string startHour)
+                                         string startHour,
+                                         string reservatedSpotIndex)
         {
 
             string price = FirebaseService.Program.getPrice(plName,priceKey);
@@ -157,7 +158,7 @@ namespace AIOtopark.Controllers
                 if (payment.Status == "success")
                 {
                     
-                    var status = await FirebaseService.Program.setReservation(userRecord, plName, plate, priceKey, date, startHour);
+                    var status = await FirebaseService.Program.setReservation(userRecord, plName, plate, priceKey, date, startHour, reservatedSpotIndex);
                     if (status == "success")
                     {
                         return RedirectToAction("Index", "Home");
@@ -165,7 +166,7 @@ namespace AIOtopark.Controllers
                     else
                     {
                         ModelState.AddModelError("", status);
-                        return RedirectToAction("ParkingLotDetail", "User");
+                        return RedirectToAction("ParkingLots", "User");
                     }
 
                 }

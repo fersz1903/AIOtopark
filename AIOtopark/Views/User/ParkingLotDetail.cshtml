@@ -81,6 +81,17 @@
                                 }
                             }
                         </select>
+                        <label for="spotIndex">Yer Seçin: </label>
+                        <select name="reservatedSpotIndex" id="spotIndex">
+                            @{
+                                foreach (var spot in Model.spotsStatusDetail)
+                                {
+                                    if(spot.status.Equals(true) && spot.isReserved.Equals(false)){
+                                        <option value=@spot.spotIndex> @spot.spotIndex.ToString() </option>
+                                    }
+                                }
+                            }
+                        </select>
                         <br />
                         <label for="selectedDate">Tarih Seçin:</label>
                         <input type="date" id="selectedDate" name="date" onchange="validateDate()" required>

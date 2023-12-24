@@ -20,6 +20,17 @@
     URL.revokeObjectURL(blobUrl);
 }
 
+//function saveAndClose() {
+//    // Kullanıcının yaptığı işlemler sonucu elde edilen JSON içeriği
+//    var jsonData = { key: 'value' }; // Örnek JSON
+
+//    // Ana sayfadaki fonksiyonu çağırarak JSON içeriğini iletiyoruz
+//    window.opener.handleSave(jsonData);
+
+//    // Pencereyi kapat
+//    window.close();
+//}
+
 
 var posList = [];
 var height = 30;

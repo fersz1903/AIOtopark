@@ -40,7 +40,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Admin}/{action=ParkingLotAddPanel}/{id?}");
 
 
 //builder.Services.AddSingleton(FirebaseApp.Create());

@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="FirebaseAdminAuthentication.DependencyInjection" Version="1.0.2" />
     <PackageReference Include="Iyzipay" Version="2.1.55" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.11" />
   </ItemGroup>
 
   <ItemGroup>

@@ -30,6 +30,7 @@ namespace AIOtopark.Controllers
             //SpotsCheckService.Program.deneme();
             //getAvailableSpotsWithPhoto();
             //SpotsCheckService.Program.sendPostRequest();
+            //SpotsCheckService.Program.checkParkingLotStatuses();
             return View(list);
         }
 
@@ -99,13 +100,6 @@ namespace AIOtopark.Controllers
         {
             return View();
         }
-
-        //public async Task<IActionResult> Login(LoginModel login)
-        //{
-
-
-
-        //}
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

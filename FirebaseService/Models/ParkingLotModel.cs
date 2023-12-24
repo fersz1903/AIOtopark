@@ -10,7 +10,8 @@ namespace FirebaseService.Models
     public class ParkingLotModel
     {
         public string name { get; set; }
-        //public List<ParkPoseModel> parkStatuses { get; set; }
+
+        public List<SpotsStatusesModel> spotsStatusDetail { get; set; }
 
         public int totalParkCount { get; set; }
         public int freeParkCount { get; set; }
