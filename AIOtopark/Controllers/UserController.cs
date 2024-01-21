@@ -17,6 +17,15 @@ namespace AIOtopark.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CheckReservation(string plName,string spotIndex, string selectedDate)
+        {
+            var result = await FirebaseService.Program.checkReservationWithSpotIndex(plName, spotIndex, selectedDate);
+            
+            return Json(new { success = result});
+        }
+
+
         public async Task<IActionResult> ParkingLots()
         {
             List<ParkingLotPreviewModel> list = await FirebaseService.Program.getParkingLotPreviews();
@@ -24,12 +33,13 @@ namespace AIOtopark.Controllers
             return View(list);
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> ParkingLotDetail(string plName) 
         {
             ParkingLotModel parklot = await FirebaseService.Program.GetParkingLot(plName);
             return View(parklot);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -165,8 +175,9 @@ namespace AIOtopark.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("", status);
-                        return RedirectToAction("ParkingLots", "User");
+                        Debug.WriteLine(status.ToString());
+                        TempData["ErrorMessage"] = "Reservation failed.";
+                        return RedirectToAction("ParkingLotDetail", "User", new { plName = plName });
                     }
 
                 }
@@ -180,9 +191,5 @@ namespace AIOtopark.Controllers
             return RedirectToAction("ParkingLots", "User");
 
         }
-
-
-
-
     }
 }

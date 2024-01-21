@@ -95,6 +95,7 @@
         <div class="container">
             <div class="rent_container">
                 @{
+                    int j = 0;
                     foreach(var item in Model)
                     {
                         <div class="box">
@@ -110,6 +111,11 @@
                                 </a>
                             </div>
                         </div>
+                        j++;
+                        if (j == 6)
+                        {
+                            break;
+                        }
                     }
                 }
                 @* <div class="box">

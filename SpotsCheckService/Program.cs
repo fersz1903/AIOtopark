@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -12,13 +13,35 @@ namespace SpotsCheckService
 {
     public class Program
     {
+        public static bool IsServiceRunning = false;
         static void Main(string[] args)
         {
             //FirebaseService.Program srv = new FirebaseService.Program();
-            deneme();
-
-            Thread.Sleep(10000);
+            //deneme();
+            //FirebaseService.Program.setEnviroment();
+            //ThreadPool.QueueUserWorkItem(BackgroundService);
+            //sendPostRequest("otopark1");
+            //Thread.Sleep(50000);
         }
+
+        public static void BackgroundService(Object? stateInfo)
+        {
+            while (!IsServiceRunning)
+            {
+                Debug.WriteLine("Service working");
+                // otopark alanı kontrolünü yap
+                ThreadPool.QueueUserWorkItem(checkParkingLotStatuses);
+
+                ThreadPool.QueueUserWorkItem(checkReservationsStatusesService);
+
+                //ThreadPool.QueueUserWorkItem(fileCheck);
+                Debug.WriteLine("Service continuing");
+                
+                Thread.Sleep(TimeSpan.FromMinutes(1)); // x dakika aralıklarla kontrol et
+            }
+        }
+
+
 
         public static async void deneme()
         {
@@ -31,9 +54,9 @@ namespace SpotsCheckService
             //ThreadPool.QueueUserWorkItem(sendPostRequest);
             //await sendPostRequest();
             FirebaseService.Program.setEnviroment();
-            //await sendPostRequest("otopark1");
+            await sendPostRequest("otopark1");
             //checkParkingLotStatuses(); // web uygulamasından başlatma gerekli fotoğraf yolunu bulamaz
-            getPoses("otopark1");
+            //getPoses("otopark1");
             Thread.Sleep(5000);
         }
         public static async Task ExecuteAsync(CancellationTokenSource cts)
@@ -77,8 +100,10 @@ namespace SpotsCheckService
             {
                 string apiUrl = "http://127.0.0.1:5000/check_parking_status"; // Endpoint URL'si
 
+                string path = @"C:\Users\Furkan\source\repos\AIOtopark\ParkingLotCameraImages\";
+                Random rand = new Random();
+                string imagePath = path + rand.Next(1, 29) +".png" ; // 1 den 29a kadar sayı üret ve rastgele foto seç
                 // Resim dosyasını içeriğe ekle
-                string imagePath = "./wwwroot" + FirebaseService.Program.getFirstFramePath(plName); // fotoğrafın yolu
                 byte[] imageBytes = File.ReadAllBytes(imagePath);
                 ByteArrayContent imageContent = new ByteArrayContent(imageBytes);
                 imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
@@ -93,17 +118,25 @@ namespace SpotsCheckService
                 //StringContent jsonContentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
                 //content.Add(jsonContentString, "json");
 
+                HttpResponseMessage response = new HttpResponseMessage();
+                string responseContent = null;
+                try
+                {
+                    // POST isteği gönderme
+                    response = await client.PostAsync(apiUrl, content);
 
-                // POST isteği gönderme
-                HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+                    // Sunucudan gelen yanıtı okuma
+                    responseContent = await response.Content.ReadAsStringAsync();
 
-                // Sunucudan gelen yanıtı okuma
-                string responseContent = await response.Content.ReadAsStringAsync();
+                }
+                catch (Exception e)
+                {
+                    
+                    Debug.WriteLine(e.Message);
+                }
 
-                // Yanıtı konsola yazdırma
-                Debug.WriteLine("Response: " + responseContent);
-
-                writeParkStatesFirestore(responseContent, plName);
+                if (responseContent != null)
+                    writeParkStatesFirestore(responseContent, plName);
             }
         }
 
@@ -185,7 +218,7 @@ namespace SpotsCheckService
         }
 
 
-        public static async void checkParkingLotStatuses()
+        public static async void checkParkingLotStatuses(Object? stateInfo)
         {
             List<String> parkingLotList = await FirebaseService.Program.getAllParkingLots();
 
@@ -194,8 +227,11 @@ namespace SpotsCheckService
                 int reservationCount = 0;
                 await sendPostRequest(lot);
             }
+        }
 
-
+        public static async void checkReservationsStatusesService(Object? stateInfo)
+        {
+            await FirebaseService.Program.deleteExpiredReservations();
         }
 
 

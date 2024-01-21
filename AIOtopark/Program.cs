@@ -44,5 +44,6 @@ app.MapControllerRoute(
 
 
 //builder.Services.AddSingleton(FirebaseApp.Create());
-
+//ThreadPool.QueueUserWorkItem(SpotsCheckService.Program.BackgroundService);
 app.Run();
+

@@ -29,7 +29,8 @@
 
     <!-- responsive style -->
     <link href="~/css/responsive.css" rel="stylesheet" />
-
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <style>
         /* İsteğe bağlı: Datepicker'ın görünümünü özelleştirmek için CSS */
         .ui-datepicker {
@@ -52,7 +53,7 @@
                     @{
                         foreach (KeyValuePair<string, object> kvp in Model.prices)
                         {
-                            <p>@kvp.Key.ToString() = @kvp.Value.ToString() TL</p>
+                            <p>@kvp.Key.ToString() Saat = @kvp.Value.ToString() TL</p>
                             <br />
                         }
                     }
@@ -60,7 +61,7 @@
             </div>
             
             <div>
-                <p>@Model.adress</p>
+                <p>ADRES: @Model.adress</p>
                 <br />
             </div> 
             <div class="parkinglot-name">
@@ -69,59 +70,68 @@
             <div class="payment-container">
                 <form asp-action="makePayment" asp-controller="User">
 
-                    <div>
-                        <label for="price">Süre Seçin: </label>
-                        <select name="priceKey" id="price">
-                            @{
-                                foreach (KeyValuePair<string, object> kvp in Model.prices)
-                                {
-                                    
-                                    <option value=@kvp.Key>@kvp.Key.ToString() Saat</option>
+                    <div class="reservationCont">
+                        <div class ="label1">
+                            <label for="price">Süre Seçin: </label>
+                            <select name="priceKey" id="price">
+                                @{
+                                    foreach (KeyValuePair<string, object> kvp in Model.prices)
+                                    {
 
-                                }
-                            }
-                        </select>
-                        <label for="spotIndex">Yer Seçin: </label>
-                        <select name="reservatedSpotIndex" id="spotIndex">
-                            @{
-                                foreach (var spot in Model.spotsStatusDetail)
-                                {
-                                    if(spot.status.Equals(true) && spot.isReserved.Equals(false)){
-                                        <option value=@spot.spotIndex> @spot.spotIndex.ToString() </option>
+                                        <option value=@kvp.Key>@kvp.Key.ToString() Saat</option>
+
                                     }
                                 }
-                            }
-                        </select>
-                        <br />
-                        <label for="selectedDate">Tarih Seçin:</label>
-                        <input type="date" id="selectedDate" name="date" onchange="validateDate()" required>
-                        <br />
+                            </select>
+                            <label for="spotIndex">Yer Seçin: </label>
+                            <select name="reservatedSpotIndex" id="spotIndex">
+                                @{
+                                    foreach (var spot in Model.spotsStatusDetail)
+                                    {
+                                        // if (spot.status.Equals(true) && spot.isReserved.Equals(false))
+                                        // {
+                                            <option value=@spot.spotIndex> @spot.spotIndex.ToString() </option>
+                                        // }
+                                    }
+                                }
+                            </select>
+                            <br />
+                            <label for="selectedDate">Tarih Seçin:</label>
+                            <input type="date" id="selectedDate" name="date" onchange="validateDate()" required>
+                            <br />
 
-                        <label for="time">Saat Seçin:</label>
-                        <input type="time" id="time" name="startHour" required>
-                        <br />
+                            <label for="time">Saat Seçin:</label>
+                            <input type="time" id="time" name="startHour" required>
+                            <br />
+                       </div>
 
-                        <input type="text" name="plate" id="plate" placeholder="Araç Plakası" required />
-                        <br />
+                        <div class="label2">
+                            <input type="text" name="plate" id="plate" placeholder="Araç Plakası" required />
+                            <br />
 
-                        <input type="text" name="cardHolderName" placeholder="Kartın Üzerindeki İsim:" required />
-                        <br />
+                            <input type="text" name="cardHolderName" placeholder="Kartın Üzerindeki İsim:" required />
+                            <br />
 
-                        <input type="number" name="cardNumber" placeholder="Kredi Kartı Numarası" required />
-                        <br />
+                            <input type="number" name="cardNumber" placeholder="Kredi Kartı Numarası" required />
+                            <br />
 
-                        <input type="number" name="expireMonth" maxlength="2" placeholder="Ay" required />
-                        <br />
+                            <input type="number" name="expireMonth" maxlength="2" placeholder="Ay" required />
+                            <br />
 
-                        <input type="number" name="expireYear" maxlength="4" placeholder="Yıl" required />
-                        <br />
+                            <input type="number" name="expireYear" maxlength="4" placeholder="Yıl" required />
+                            <br />
 
-                        <input type="number" name="cvc" maxlength="3" placeholder="CVC/CVV" required />
-                        <br />
-
-                        <input type="hidden" name="plName" value=@Model.name />
-                        <button type="submit" > Ödeme Yap </button>
+                            <input type="number" name="cvc" maxlength="3" placeholder="CVC/CVV" required />
+                            <br />
+                        </div>
+                        
+                        
                     </div>
+                    <div class="label3">
+                        <input type="hidden" id="plName" name="plName" value=@Model.name />
+                        <button id="reservate" type="submit"> Ödeme Yap </button>
+                    </div>
+                    <p style="color:#f22324">@TempData["ErrorMessage"]</p>
                 </form>               
             </div>
         </div>
@@ -133,11 +143,52 @@
         var inputDate = new Date(document.getElementById('selectedDate').value);
         var currentDate = new Date();
         var maxDate = new Date(currentDate);
+        var minDate = new Date(currentDate);
         maxDate.setDate(currentDate.getDate() + 15);
-
+        minDate.setDate(currentDate.getDate());
         if (inputDate > maxDate) {
             alert("Geçerli bir tarih seçin (maksimum 15 gün sonrası)!");
             document.getElementById('selectedDate').value = currentDate;
         }
+        if (inputDate < minDate) {
+            alert("Geçerli bir tarih seçin (aynı güne veya eski bir tarihe rezervasyon yapılamaz)!");
+            document.getElementById('selectedDate').value = currentDate;
+        }
     }
+
+    $(function () {
+        // Tarih/saat seçici değiştiğinde
+        $("#selectedDate").on("change", function () {
+            callMyAction();
+        });
+    });
+
+    function callMyAction() {
+        var value1 = $("#plName").val();
+        var value2 = $("#spotIndex").val();
+        var value3 = $("#selectedDate").val();
+        var currentDate = new Date();
+        $.ajax({
+            url: '/User/CheckReservation',
+            type: 'GET',
+            dataType: 'json',
+            data: { plName: value1, spotIndex: value2, selectedDate: value3 },
+            success: function (data) {
+                if (data.success) {
+                    console.log('Action başarıyla çağrıldı.');
+                } else {
+                    alert("Seçilen tarihte bu park yeri dolu. Lütfen farklı park yeri seçiniz.");
+                    document.getElementById('selectedDate').value = currentDate;
+
+                }
+            },
+            error: function () {
+                console.log('Action çağrılırken bir hata oluştu.');
+            }
+        });
+    }
+
+
+
 </script>
+

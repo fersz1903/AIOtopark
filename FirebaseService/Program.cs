@@ -14,6 +14,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Net.Http.Json;
 using System.Reflection.Metadata;
 using System.Text;
 using static Google.Cloud.Firestore.V1.StructuredQuery.Types;
@@ -56,7 +57,9 @@ namespace FirebaseService
             //FirebaseApp.Create();
             //UserRecord userRecord = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.GetUserByEmailAsync("asdasaad@example.com");
 
-            await GetParkingLot("otopark1");
+            //await GetParkingLot("otopark1");
+            //checkReservationWithSpotIndex("otopark1","3", "2024-01-10");
+            deleteExpiredReservations();
             Thread.Sleep(5000);
             //setReservation(userRecord, "otopark1","06 AA 06","3");
             // See the UserRecord reference doc for the contents of userRecord.
@@ -531,12 +534,110 @@ namespace FirebaseService
             FirestoreDb db = ConnectionConfig();
             var docRef = db.Collection(plName).Document("Reservations");
             DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
-            foreach (var item in snap.ToDictionary())
+            if (snap.Exists)
             {
-                if (item.Key == uid) { return true; }
+                foreach (var item in snap.ToDictionary())
+                {
+                    if (item.Key == uid) { return true; }
+                } 
             }
             return false;
         }
+
+
+        // reservasyon eğer index ve tarihle eşitse rezerve edilemez geriye false döner.
+        public static async Task<bool> checkReservationWithSpotIndex(string plName, string spotIndex, string selectedDate)
+        {
+            FirestoreDb db = ConnectionConfig();
+            var docRef = db.Collection(plName).Document("Reservations");
+            DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+            if (snap.Exists)
+            {
+                var reservation = snap.ToDictionary();
+                
+                //var fields = (Dictionary<string, object>)reservation[reservation.Keys.First()];
+
+                foreach (var item in reservation)
+                {
+                    var fields = (Dictionary<string, object>)reservation[item.Key.ToString()];
+
+                    var reservatedSpot = fields["reservatedSpot"];
+                    var startDate = fields["startDate"];
+                    //var range = fields["plate"];
+
+                    if(reservatedSpot.Equals(spotIndex))
+                    {
+                        DateTime firestoreDate = DateTime.ParseExact(startDate.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                        DateTime selectionDate = DateTime.ParseExact(selectedDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                        bool isEqual = firestoreDate.Date == selectionDate.Date;
+
+                        if (isEqual)
+                        {
+                            return false;
+                        }
+                    }
+
+                    //DateTime firestoreDate = DateTime.ParseExact(startDate.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                    //DateTime selectionDate = DateTime.ParseExact(selectedDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                    //bool isEqual = firestoreDate.Date == selectionDate.Date;
+                }
+
+                //var range = fields.Values.FirstOrDefault("range"); 
+            }
+            return true;
+        }
+
+
+        public static async Task<string> deleteExpiredReservations()
+        {
+            FirestoreDb db = ConnectionConfig();
+            List<String> list = await getAllParkingLots();
+
+            foreach (var plName in list)
+            {
+                var docRef = db.Collection(plName).Document("Reservations");
+                DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+
+                if (snap.Exists)
+                {
+                    var reservation = snap.ToDictionary();
+
+                    //var fields = (Dictionary<string, object>)reservation[reservation.Keys.First()];
+
+                    foreach (var item in reservation)
+                    {
+                        var fields = (Dictionary<string, object>)reservation[item.Key.ToString()];
+
+                        var startDate = fields["startDate"];
+                        var startHour = fields["startHour"];
+                        var range = fields["range"];
+
+                        DateTime.TryParseExact(startDate.ToString(), "yyyy-MM-dd", null, DateTimeStyles.None, out DateTime tarih);
+                        TimeSpan.TryParseExact(startHour.ToString(), "hh\\:mm", null, out TimeSpan saat);
+
+                        //DateTime firestoreDate = DateTime.ParseExact(startDate.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                        //firestoreDate = firestoreDate.AddHours(Double.Parse( startHour.ToString()));
+
+                        DateTime reservationDateTime = tarih.Add(saat);
+                        DateTime currentDate = DateTime.Now;
+
+                        if (currentDate > reservationDateTime.AddHours(Double.Parse(range.ToString()))){ // rezervasyonun süresi geçmiş sil
+                            Debug.WriteLine("reservation deleted");
+
+                            Dictionary<string, object> updates = new Dictionary<string, object>
+                            {
+                                { item.Key.ToString(), FieldValue.Delete }
+                            };
+                            await docRef.UpdateAsync(updates);
+                        }
+                    } 
+                }
+            }
+            return null;
+        }
+           
 
         public static async Task<List<String>> getAllParkingLots()
         {
@@ -549,7 +650,8 @@ namespace FirebaseService
                 while (await subcollectionsEnumerator.MoveNextAsync())
                 {
                     CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
-                    list.Add(subcollectionRef.Id.ToString());
+                    if(!subcollectionRef.Id.Equals("Admin"))
+                        list.Add(subcollectionRef.Id.ToString());
                 }
                 return list;
             }
@@ -591,7 +693,7 @@ namespace FirebaseService
             return count;
 		}
 
-        public static async Task<bool> addParkingLot(string plName, string adress,string mainPhotoPath, string firstFramePath, string poses)
+        public static async Task<bool> addParkingLot(string plName, string adress,string mainPhotoPath, string firstFramePath, string poses, string priceListJson)
         {
             FirestoreDb db = ConnectionConfig();
             DocumentReference docRef = db.Collection(plName).Document("Adress");
@@ -609,11 +711,25 @@ namespace FirebaseService
             docRef = db.Collection(plName).Document("images");
             await docRef.SetAsync(data);
 
+            data = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(priceListJson))
+            {
+                // JSON string'ini bir diziye dönüştür
+                List<List<int>> priceList = JsonConvert.DeserializeObject<List<List<int>>>(priceListJson);
+
+                foreach (var listItem in priceList)
+                {
+                    data.Add(listItem[0].ToString(), listItem[1].ToString());               
+                    // ListItem formatı: "Key: value"
+                }
+                docRef = db.Collection(plName).Document("Prices");
+                docRef.SetAsync(data);
+            }
+
             await uploadParkPoses(poses, plName);
 
             return true;
             // SpotsStatus hemen eklenmeli!!
-
         }
 
     }

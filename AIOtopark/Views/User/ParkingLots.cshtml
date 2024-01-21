@@ -46,7 +46,7 @@
                                 <img src="@item.mainPhoto" alt="">
                             </div>
                             <div class="price">
-                            <form method="post" asp-action="ParkingLotDetail" asp-controller="User">
+                            <form method="get" asp-action="ParkingLotDetail" asp-controller="User">
                                     <input type="hidden" name="plName" value="@item.name">
                                     <button type="submit" class="parkinglotShow">
                                         

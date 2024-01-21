@@ -280,7 +280,7 @@ a:focus {
 }
 
 .slider_section .slider_container .img-box img {
-  width: 100%;
+  width: 100%
 }
 
 .slider_section .slider_container .detail_container {
@@ -692,6 +692,7 @@ a:focus {
 
 .rent_section .rent_container .box .img-box img {
   max-width: 100%;
+  max-height: 200%;
 }
 
         .rent_section .rent_container .box .price a {
@@ -1226,5 +1227,41 @@ a:focus {
     margin-top:2rem;
 }
 
+
+.reservationCont {
+    display: flex;
+    
+}
+
+.label1 {
+    margin-top:35px;
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+}
+
+.label2 {
+    flex: 1;
+    padding: 10px;
+    text-align:center;
+}
+
+.label3{
+    flex: 1;
+    padding: 10px;
+    align-items:center;
+    justify-content:center;
+    display:flex;
+}
+
+#reservate {
+    display: flex;
+    padding: 10px 45px;
+    background-color: #f22324;
+    color: #fefdfc;
+    border-radius: 0;
+    border: 1px solid #f22324;
+    text-transform: uppercase;
+}
 
 /*# sourceMappingURL=style.css.map */

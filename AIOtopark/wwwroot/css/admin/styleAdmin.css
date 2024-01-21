@@ -1044,7 +1044,7 @@ a:focus {
     background-size: cover;
     color: black;
 }
-.contact_section2 .form_container form #save{
+.contact_section2 .form_container form .save{
     display:inline-block; 
     padding: 10px 100px;
     background-color: #f22324;
@@ -1254,8 +1254,35 @@ a:focus {
     margin-top: 15px;
     font-family: 'Poppins', sans-serif;
     font-size: 15px;
+    margin-left:-4px;
 }
 
 .contact_section2 .form_container form #posList{
-    margin-left:16px;
+    margin-left:20px;
+}
+
+.contact_section2 .form_container form .save2 {
+    display: inline-block;
+    padding: 5px;
+    background-color: #47BE7D;
+    color: #fefdfc;
+    border-radius: 5px;
+    border: 1px solid #47BE7D;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    width:68px;
+}
+
+.priceAdd {
+    width: auto;
+    display: flex;
+}
+
+.priceAdd input{
+    width: auto;
+    display: flex;
+    margin-right: 10px;
 }

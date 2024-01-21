@@ -34,24 +34,26 @@ namespace AIOtopark.Controllers
         [HttpPost]
         public IActionResult saveParkingLot(string plName,
                                             string adress, 
+                                            string prices,
                                             IFormFile mainPhoto, 
                                             IFormFile firstFrame, 
                                             IFormFile poses)
         {
-
+            //string dynamicListJson = Request.Form["dynamicList"];
             string mainPhotoPath = "../parkingLotImages/" + uploadImage(mainPhoto);
             string firstFramePath = "/parkingLotImages/" + uploadImage(firstFrame);
 
-            //FirebaseService.Program.uploadParkPoses(readPoses(poses),plName);
-            var result = FirebaseService.Program.addParkingLot(plName,adress,mainPhotoPath,firstFramePath,readPoses(poses));
+           
 
-            if (result.Result == true)
+            //FirebaseService.Program.uploadParkPoses(readPoses(poses),plName);
+            var result = FirebaseService.Program.addParkingLot(plName,adress,mainPhotoPath,firstFramePath,readPoses(poses),prices).GetAwaiter().GetResult();
+            if (result)
             {
                 SpotsCheckService.Program.databaseInit(plName);
             }
             else
             {
-                TempData["error"] = "Otopark Eklenemedi. Result:" + result.Result;
+                TempData["error"] = "Otopark Eklenemedi. Result:" + result;
             }
 
             return RedirectToAction("ParkingLotAddPanel");
