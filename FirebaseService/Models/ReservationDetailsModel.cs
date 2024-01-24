@@ -10,15 +10,11 @@ namespace FirebaseService.Models
     [FirestoreData]
     public class ReservationDetailsModel
     {
-        [FirestoreProperty]
+        public string plName { get; set; }
         public string startDate { get; set; }
-        [FirestoreProperty]
         public string startHour { get; set; }
-        [FirestoreProperty]
         public string range { get; set; }
-        [FirestoreProperty]
         public string plate { get; set; }
-        [FirestoreProperty]
         public string reservatedSpot { get; set; }
         
     }

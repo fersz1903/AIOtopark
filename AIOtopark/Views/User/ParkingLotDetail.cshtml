@@ -50,11 +50,11 @@
 
             <div class="">
                 <div class="price-container">
+                    <p> Fiyat Tarifesi </p>
                     @{
                         foreach (KeyValuePair<string, object> kvp in Model.prices)
                         {
                             <p>@kvp.Key.ToString() Saat = @kvp.Value.ToString() TL</p>
-                            <br />
                         }
                     }
                 </div>

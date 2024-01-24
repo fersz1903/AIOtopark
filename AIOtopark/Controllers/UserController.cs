@@ -10,11 +10,12 @@ using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace AIOtopark.Controllers
 {
-    public class UserController : Controller // base controller ile değiştirilecek authentication için.
+    public class UserController : Base // base controller ile değiştirilecek authentication için.
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            ReservationDetailsModel reservationDetails = await FirebaseService.Program.getRezervations(await FirebaseService.Program.getUserIdWithEmail(HttpContext.Session.GetString("UserSession")));
+            return View(reservationDetails);
         }
 
         [HttpGet]
@@ -190,6 +191,15 @@ namespace AIOtopark.Controllers
             
             return RedirectToAction("ParkingLots", "User");
 
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteReservation()
+        {
+            string email = HttpContext.Session.GetString("UserSession");
+            string userId = await FirebaseService.Program.getUserIdWithEmail(email);
+            FirebaseService.Program.deleteReservation(userId);
+            return RedirectToAction("Index", "User");
         }
     }
 }

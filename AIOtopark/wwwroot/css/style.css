@@ -1045,6 +1045,12 @@ a:focus {
     background-size: cover;
     color: #fefdfc;
 }
+.contact_section3 {
+    margin-top: 20px;
+    background-size: cover;
+    color: black;
+}
+
 .contact_section2 .form_container form button {
     display: inline-block;
     padding: 10px 65px;

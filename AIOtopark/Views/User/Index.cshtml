@@ -1,4 +1,6 @@
-﻿<head>
+﻿@model FirebaseService.Models.ReservationDetailsModel
+
+<head>
     <!-- Basic -->
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -26,15 +28,39 @@
 
     <!-- responsive style -->
     <link href="~/css/responsive.css" rel="stylesheet" />
+
 </head>
 <body class="bodyRegister">
-    <section class="contact_section2 layout_padding">
+    
+    <section class="contact_section3 layout_padding">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 mx-auto">
-                    <div class="form_container">
-                        
-                    </div>
+                <div class="col-md-10 mx-auto">
+                    <form asp-action="deleteReservation" asp-controller="User" method="post">
+                    @{
+                        if(Model != null)
+                        {
+                            <div class="card">
+                                <h5 class="card-header">Rezervasyon</h5>
+                                <div class="card-body">
+                                    <h5 class="card-title">Rezervasyon Detayları</h5>
+                                    <p class="card-text">Otopark : @Model.plName</p>
+                                    <p class="card-text">Park Alanı : @Model.reservatedSpot</p>
+                                    <p class="card-text">Tarih : @Model.startDate  @Model.startHour</p>
+                                    <p class="card-text">Süre : @Model.range Saat</p>
+                                    <p class="card-text">Plaka : @Model.plate</p>
+                                    <button type="submit" class="btn btn-danger">Sil</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <h5 class="card-header">Rezervasyon Bulunamadı</h5>
+                            </div>
+                        }
+                    }
+                    </form>
                 </div>
             </div>
         </div>

@@ -101,5 +101,40 @@ namespace AIOtopark.Controllers
                 return View("Registration", register);
             }
         }
+
+
+        public IActionResult AdminSignIn()
+        {
+            if (HttpContext.Session.GetString("UserSession") != null)
+            {
+                if (HttpContext.Session.GetString("UserSession").Equals("admin"))
+                    return RedirectToAction("Index", "Admin");
+                return View();
+            }
+            else return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> adminLogin(string username, string password)
+        {
+            bool result = await FirebaseService.Program.adminLoginControl(username, password);
+
+            if (result)
+            {
+                HttpContext.Session.SetString("UserSession", username);
+                return RedirectToAction("Index", "Admin");
+            } 
+            
+            return View("AdminSignIn");
+        }
+
+
+        public IActionResult deleteSession()
+        {
+            HttpContext.Session.Remove("UserSession");
+            return RedirectToAction("SignIn", "Login");
+        }
+
     }
 }

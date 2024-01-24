@@ -76,7 +76,11 @@ namespace FirebaseService
             FirebaseApp.Create();
         }
 
-
+        public static async Task<string> getUserIdWithEmail(string email)
+        {
+            UserRecord userRecord = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.GetUserByEmailAsync(email);
+            return userRecord.Uid;
+        }
 
         public static async Task<string> createUser(RegisterModel register)
         {
@@ -375,6 +379,9 @@ namespace FirebaseService
                 {
                     ParkingLotPreviewModel parkingLotPreviewModel = new ParkingLotPreviewModel();
                     CollectionReference subcollectionRef = subcollectionsEnumerator.Current;
+
+                    if (subcollectionRef.Id.ToString().Equals("Admin"))
+                        continue;
                     parkingLotPreviewModel.name = subcollectionRef.Id.ToString(); //otopark1-2-3
 
                     DocumentReference docRef = subcollectionRef.Document("SpotsStatus").Collection("Section1").Document("Statuses"); // farklı section durumları düzenlenecek
@@ -637,7 +644,69 @@ namespace FirebaseService
             }
             return null;
         }
-           
+        public static async Task<ReservationDetailsModel> getRezervations(string userID)
+        {
+            FirestoreDb db = ConnectionConfig();
+            List<String> list = await getAllParkingLots();
+
+            foreach (var plName in list)
+            {
+                var docRef = db.Collection(plName).Document("Reservations");
+                DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+
+                if (snap.Exists)
+                {
+                    var reservation = snap.ToDictionary();
+                    foreach (var item in reservation)
+                    {
+                        if (item.Key.ToString().Equals(userID))
+                        {
+                            ReservationDetailsModel rsrvDetails = new ReservationDetailsModel();
+
+                            var fields = (Dictionary<string, object>)reservation[item.Key.ToString()];
+
+                            rsrvDetails.startDate = fields["startDate"].ToString();
+                            rsrvDetails.startHour = fields["startHour"].ToString();
+                            rsrvDetails.range = fields["range"].ToString();
+                            rsrvDetails.plate = fields["plate"].ToString();
+                            rsrvDetails.reservatedSpot = fields["reservatedSpot"].ToString();
+                            rsrvDetails.plName = plName;
+                            return rsrvDetails;
+                        }
+                    }
+                }            
+            }
+            return null;
+        }
+
+        public static async void deleteReservation(string userID)
+        {
+            FirestoreDb db = ConnectionConfig();
+            List<String> list = await getAllParkingLots();
+
+            foreach (var plName in list)
+            {
+                var docRef = db.Collection(plName).Document("Reservations");
+                DocumentSnapshot snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+
+                if (snap.Exists)
+                {
+                    var reservation = snap.ToDictionary();
+                    foreach (var item in reservation)
+                    {
+                        if (item.Key.ToString().Equals(userID))
+                        {
+                            Dictionary<string, object> updates = new Dictionary<string, object>
+                            {
+                                { item.Key.ToString(), FieldValue.Delete }
+                            };
+                            await docRef.UpdateAsync(updates);
+                        }
+                    }
+                }
+            }
+        }
+    
 
         public static async Task<List<String>> getAllParkingLots()
         {
@@ -731,6 +800,31 @@ namespace FirebaseService
             return true;
             // SpotsStatus hemen eklenmeli!!
         }
+
+
+        public static async Task<bool> adminLoginControl(string _username, string _password)
+        {
+            FirestoreDb db = ConnectionConfig();
+            DocumentReference docRef = db.Collection("Admin").Document("Credentials");
+            Dictionary<string, object> data = new Dictionary<string, object>();
+
+            var snap = docRef.GetSnapshotAsync().GetAwaiter().GetResult();
+
+            if(snap.Exists)
+            {
+                data = snap.ToDictionary();
+                string username = data.GetValueOrDefault("username").ToString();
+                string paswword = data.GetValueOrDefault("password").ToString();
+                
+                if(username.Equals(_username) && paswword.Equals(_password))
+                {
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
+
 
     }
 }

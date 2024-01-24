@@ -3,20 +3,20 @@ using System.Diagnostics;
 
 namespace AIOtopark.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseAdmin
     {
         public async Task<IActionResult> Index()
         {
-			//try
-			//{
-			//	List<String> list = await FirebaseService.Program.getAllParkingLots();
-			//	ViewData["plCount"] = list.Count().ToString();
-			//	ViewData["userCount"] = await FirebaseService.Program.getUserCount();
-			//}
-			//catch (Exception e)
-			//{
-			//	Debug.WriteLine(e.Message);
-			//}
+            try
+            {
+                List<String> list = await FirebaseService.Program.getAllParkingLots();
+                ViewData["plCount"] = list.Count().ToString();
+                ViewData["userCount"] = await FirebaseService.Program.getUserCount();
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
             return View();
         }
 
@@ -95,5 +95,27 @@ namespace AIOtopark.Controllers
             string modelsImagePath = Path.GetFileName(file.FileName).ToString();
             return modelsImagePath;
         }
-    }
+
+		[HttpPost]
+		public ActionResult UpdateSwitch(bool switchValue)
+		{
+            if (!SpotsCheckService.Program.IsServiceRunning)
+            {
+                SpotsCheckService.Program.startService();
+            }
+
+            SpotsCheckService.Program.IsServiceRunning = switchValue;
+
+			// Cevap döndürebilirsiniz, eğer gerekirse
+			return Json(new { success = SpotsCheckService.Program.IsServiceRunning});
+		}
+
+		[HttpPost]
+		public ActionResult CheckService()
+		{
+			// Cevap döndürebilirsiniz, eğer gerekirse
+			return Json(new { success = SpotsCheckService.Program.IsServiceRunning });
+		}
+
+	}
 }

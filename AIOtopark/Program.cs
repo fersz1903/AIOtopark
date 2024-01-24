@@ -40,10 +40,11 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Admin}/{action=ParkingLotAddPanel}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
 //builder.Services.AddSingleton(FirebaseApp.Create());
 //ThreadPool.QueueUserWorkItem(SpotsCheckService.Program.BackgroundService);
+//SpotsCheckService.Program.startService();
 app.Run();
 

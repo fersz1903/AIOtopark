@@ -24,9 +24,19 @@ namespace SpotsCheckService
             //Thread.Sleep(50000);
         }
 
+        public static async void startService()
+        {
+            if (!IsServiceRunning)
+            {
+				ThreadPool.QueueUserWorkItem(BackgroundService);
+                IsServiceRunning = true;
+			}
+        }
+
+
         public static void BackgroundService(Object? stateInfo)
         {
-            while (!IsServiceRunning)
+            while (IsServiceRunning)
             {
                 Debug.WriteLine("Service working");
                 // otopark alanı kontrolünü yap
@@ -40,8 +50,6 @@ namespace SpotsCheckService
                 Thread.Sleep(TimeSpan.FromMinutes(1)); // x dakika aralıklarla kontrol et
             }
         }
-
-
 
         public static async void deneme()
         {

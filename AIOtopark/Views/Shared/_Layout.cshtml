@@ -37,8 +37,8 @@
                             <div class="dropdown">
                                 <button class="dropbtn">@userSession</button>
                                 <div class="dropdown-content">
-                                    <a href="#">Rezervasyon</a>
-                                    <a href="#">Çıkış</a>
+                                    <a asp-action="ParkingLots" asp-controller="User">Rezervasyon</a>
+                                    <a asp-action="deleteSession" asp-controller="Login">Çıkış</a>
                                 </div>
                             </div>
                         } 
@@ -59,16 +59,15 @@
                     </div>
                     <div id="myNav" class="overlay">
                         <div class="overlay-content">
-                        <a href="index.html">Home</a>
-                        <a href="about.html">About</a>
-                        <a href="contact.html">Contact Us</a>
+                        <a asp-action="Index" asp-controller="Home">Ana Sayfa</a>
 
                         @{
                             if (userSession != null)
                             {
-                                <a href="#">Rezervasyon</a>
-                                <a href="#">Çıkış</a>
-
+                                <a asp-action="Index" asp-controller="User">Rezervasyonum</a>
+                                <a asp-action="ParkingLots" asp-controller="User">Otoparklar</a>
+                                <a asp-action="deleteSession" asp-controller="Login">Çıkış</a>
+                                
                             }
                             else
                             {
